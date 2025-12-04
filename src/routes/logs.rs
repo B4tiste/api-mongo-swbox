@@ -34,6 +34,21 @@ async fn get_unique_users(
     }
 }
 
+async fn get_nb_servers(
+    State(state): State<AppState>,
+    Query(params): Query<HashMap<String, String>>,
+) -> Result<Json<Value>, (StatusCode, Json<String>)> {
+    let timestamp = params.get("timestamp").and_then(|ts| ts.parse().ok());
+
+    match services::get_nb_servers(state.get_logs_collection(), timestamp).await {
+        Ok(count) => Ok(Json(json!({ "nb": count }))),
+        Err(err) => {
+            eprintln!("Error getting servers count: {}", err);
+            Err((StatusCode::INTERNAL_SERVER_ERROR, Json("Error".into())))
+        }
+    }
+}
+
 pub fn logs_routes(app_state: AppState) -> axum::Router {
     let routes = Router::new()
         .route("/commands", get(get_nb_commands))
