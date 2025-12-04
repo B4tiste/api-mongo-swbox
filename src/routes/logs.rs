@@ -53,6 +53,7 @@ pub fn logs_routes(app_state: AppState) -> axum::Router {
     let routes = Router::new()
         .route("/commands", get(get_nb_commands))
         .route("/users", get(get_unique_users))
+        .route("/servers", get(get_nb_servers))
         .with_state(app_state);
 
     Router::new().nest("/logs", routes)
