@@ -11,7 +11,8 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> shuttle_
 
     let cors = CorsLayer::new()
         .allow_origin([
-            "https://bot-swbox.netlify.app".parse().unwrap()
+            "https://bot-swbox.netlify.app".parse().unwrap(),
+            "http://localhost:4200".parse().unwrap(), // for local dev on the front
         ]).allow_methods(Any).allow_headers(Any);
     let app_state = AppState { mongo: mongo };
     
