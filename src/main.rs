@@ -2,7 +2,7 @@ use axum::{Extension, Router};
 use tower_http::cors::{Any, CorsLayer};
 use shuttle_runtime::SecretStore;
 
-use api_mongo_swbox::{state::AppState, routes::logs};
+use api_mongo_swbox::{state::AppState, routes::{logs, subs}};
 
 #[shuttle_runtime::main]
 async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> shuttle_axum::ShuttleAxum {
@@ -11,16 +11,20 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> shuttle_
 
     let cors = CorsLayer::new()
         .allow_origin([
-            "https://bot-swbox.netlify.app".parse().unwrap(),
-            "http://localhost:4200".parse().unwrap(),
-            "http://127.0.0.1:4200".parse().unwrap(),
+            "https://bot-swbox.netlify.app".parse().unwrap(),   // Website
+            "http://localhost:4200".parse().unwrap(),           // Local website dev
+            "http://127.0.0.1:4200".parse().unwrap(),           // Local website dev
+            "http://127.0.0.1:8000".parse().unwrap(),           // Local API dev
         ]).allow_methods(Any).allow_headers(Any);
     let app_state = AppState { mongo: mongo };
-    
+
+    // Routers
     let logs_routes = logs::logs_routes(app_state.clone());
+    let subs_routes = subs::subs_routes(app_state.clone());
 
     let app = Router::new()
         .merge(logs_routes)
+        .merge(subs_routes)
         .layer(Extension(app_state.clone()))
         .layer(cors);
 
